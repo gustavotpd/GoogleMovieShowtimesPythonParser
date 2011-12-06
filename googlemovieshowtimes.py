@@ -2,7 +2,21 @@ import httplib, urllib, BeautifulSoup, re
 from copy import deepcopy
 from BeautifulSoup import BeautifulSoup
 
+'''
+GoogleMovieShowtimes class
+	This class is used for getting response from www.google.com/movies
+'''
 class GoogleMovieShowtimes:
+	'''
+	Constructor for GoogleMovieShowtimes class.
+
+	Parameters:
+		near (optional)     - (string) valid name of the location (city)
+		mid	(optional)      - (string) valid movie ID. Can be taken from
+		                      www.google.com/movies
+		tid	(optional)      -	(string) valid theater ID. Can be taken from
+		                      www.google.com/movies
+	'''
 	def __init__(self, near, mid, tid):
 		self.params = {'near': near, 'mid': mid, 'tid': tid}
 
@@ -23,6 +37,12 @@ class GoogleMovieShowtimes:
 		if (self.response_code == 200):
 			self.html = BeautifulSoup(self.response_body)
 
+	'''
+	Function for parsing the response and getting all the important data
+	as a huge dictionary object.
+
+	No parameters are required.
+	'''
 	def parse(self):
 		if 'mid' in self.params:
 			resp = {'movie': []}
