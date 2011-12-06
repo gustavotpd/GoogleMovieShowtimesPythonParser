@@ -1,10 +1,8 @@
-import httplib, urllib, BeautifulSoup
+import httplib, urllib, BeautifulSoup, re
 from copy import deepcopy
 from BeautifulSoup import BeautifulSoup
 
 class GoogleMovieShowtimes:
-	base_path = 'movies.google.com'
-
 	def __init__(self, near, mid, tid):
 		self.params = {'near': near, 'mid': mid, 'tid': tid}
 
@@ -14,10 +12,8 @@ class GoogleMovieShowtimes:
 				self.params.pop(key)
 		params = urllib.urlencode(self.params)
 
-		'''conn = httplib.HTTPConnection(self.base_path)'''
 		conn = httplib.HTTPConnection('www.google.com')
-		print params
-		conn.request("POST", "/movies", params)
+		conn.request("GET", "/movies?" + params, "")
 
 		response = conn.getresponse()
 		self.response_code = response.status
@@ -27,10 +23,94 @@ class GoogleMovieShowtimes:
 		if (self.response_code == 200):
 			self.html = BeautifulSoup(self.response_body)
 
-		print self.html.prettify()
-
 	def check(self):
 		if (self.response_code == 200):
 			return True
 		return False
 
+	def parse(self):
+		if 'mid' in self.params:
+			resp = {'movie': []}
+			movies = self.html.findAll('div', attrs={'class': 'movie'})
+			for div in movies:
+				resp['movie'].append({})
+
+				index = resp['movie'].index({})
+
+				movie = []
+
+				name = div.div.h2
+				movie.append(('name', div.div.h2.contents[0]))
+
+				movie.append(('info', div.div.find('div', attrs={'class':  'info'})))
+				movie.append(('info_links', div.div.find('div', attrs={'class':  'links'})))
+				movie.append(('theater', []))
+
+				resp['movie'][index] = dict(movie)
+
+				theaters = div.findAll('div', {'class': 'theater'})
+				for div_theater in theaters:
+					resp['movie'][index]['theater'].append({})
+
+					index_th = resp['movie'][index]['theater'].index({})
+
+					theater = []
+
+					name = div_theater.div.find(attrs={'class': 'name'}).a.contents[0]
+					theater.append(('name', name))
+
+					theater.append(('address', div_theater.div.find(attrs={'class': 'address'}).contents[0]))
+					theater.append(('times', []))
+
+					resp['movie'][index]['theater'][index_th] = dict(theater)
+
+					times = div_theater.find('div', {'class': 'times'})
+					times = times.findAll('span')
+					for div_time in times:
+						time = []
+
+						if len(div_time.contents) == 3:
+							time_val = div_time.contents[2]
+							time_val = re.search('(.*)&#', time_val)
+
+							resp['movie'][index]['theater'][index_th]['times'].append(time_val.group(1))
+
+			return resp
+
+		resp = {'theater': []}
+		theaters = self.html.findAll('div', attrs={'class': 'theater'})
+		for div in theaters:
+			resp['theater'].append({})
+
+			index = resp['theater'].index({})
+
+			theater = []
+			theater.append(('name', div.div.h2.a.contents[0]))
+			theater.append(('info', div.div.div.contents[0]))
+			theater.append(('movies', []))
+
+			resp['theater'][index] = dict(theater)
+
+			movies = div.findAll('div', {'class': 'movie'})
+			for div_movie in movies:
+				resp['theater'][index]['movies'].append({})
+
+				index_m = resp['theater'][index]['movies'].index({})
+
+				movie = []
+				movie.append(('name', div_movie.div.a.contents[0]))
+				movie.append(('info', div_movie.span.contents[0]))
+				movie.append(('times', []))
+
+				resp['theater'][index]['movies'][index_m] = dict(movie)
+
+				times = div_movie.find('div', {'class': 'times'})
+				times = times.findAll('span')
+				for div_time in times:
+					if len(div_time.contents) == 3:
+						time_val = div_time.contents[2]
+						time_val = re.search('(.*)&#', time_val)
+
+						resp['theater'][index]['movies'][index_m]['times'].append(time_val.group(1))
+
+	return resp
