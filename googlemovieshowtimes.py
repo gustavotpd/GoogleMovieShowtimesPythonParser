@@ -23,11 +23,6 @@ class GoogleMovieShowtimes:
 		if (self.response_code == 200):
 			self.html = BeautifulSoup(self.response_body)
 
-	def check(self):
-		if (self.response_code == 200):
-			return True
-		return False
-
 	def parse(self):
 		if 'mid' in self.params:
 			resp = {'movie': []}
@@ -113,4 +108,4 @@ class GoogleMovieShowtimes:
 
 						resp['theater'][index]['movies'][index_m]['times'].append(time_val.group(1))
 
-	return resp
+		return resp
