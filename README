@@ -1,5 +1,13 @@
 Google Movie Showtimes Parser
 
+Google Movie Showtimes is an amazing free service that lets you get
+information about movie showtimes in a city. You can get showtimes of a
+movie getting screened in theaters of your city. Alternately, you can
+also get information and showtimes of all the movies getting screened in
+a particular theater.
+
+There doesn't exist an API for Google Movies Showtimes.
+
 This script provides a Python class that can be used to parse Google Movie
 Showtimes (www.google.com/movies) pages into dictionary objects.
 
