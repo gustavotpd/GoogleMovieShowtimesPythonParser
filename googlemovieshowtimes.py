@@ -1,3 +1,13 @@
+'''
+Google Movie Showtimes parser class for Python.
+
+This script provides a Python class that can be used to parse Google Movie
+Showtimes (www.google.com/movies) pages into dictionary objects.
+
+@author Vaidik Kapoor
+@version 0.1
+'''
+
 import httplib, urllib, BeautifulSoup, re
 from copy import deepcopy
 from BeautifulSoup import BeautifulSoup
